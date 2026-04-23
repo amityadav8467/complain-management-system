@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ComplainHub — Manage Complaints. Resolve Faster.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary: #080a12;
+      --bg-secondary: #0d1117;
+      --bg-card: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.14);
+      --cyan: #00d4ff;
+      --cyan-dark: #0095ff;
+      --violet: #8b5cf6;
+      --text-primary: #ffffff;
+      --text-secondary: #a0aec0;
+      --text-muted: #4a5568;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.3s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── LAYOUT ─── */
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+
+    .section { width: 100%; padding: 96px 0; }
+    .section-alt { background: rgba(255,255,255,0.012); }
+
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--cyan);
+      letter-spacing: 4px;
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(28px, 3.2vw, 44px);
+      color: var(--text-primary);
+      text-align: center;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .section-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+      text-align: center;
+      max-width: 520px;
+      margin: 14px auto 0;
+      line-height: 1.75;
+    }
+
+    .cyan { color: var(--cyan); }
+    .grad-text {
+      background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--cyan), var(--cyan-dark)); color: #000; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,212,255,0.38); }
+    .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.18); color: var(--text-primary); font-family: var(--font-body); font-weight: 500; }
+    .btn-outline:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,212,255,0.05); }
+    .btn-hero { padding: 15px 34px; font-size: 15px; border-radius: var(--radius); }
+
+    .btn-hero-sec {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-primary);
+      padding: 15px 34px;
+      font-size: 15px;
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-hero-sec:hover { border-color: rgba(255,255,255,0.32); background: rgba(255,255,255,0.09); transform: translateY(-1px); }
+
+    .btn-cta {
+      background: transparent;
+      border: 2px solid var(--cyan);
+      color: var(--cyan);
+      padding: 16px 48px;
+      border-radius: var(--radius);
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-cta:hover { background: var(--cyan); color: #000; transform: translateY(-2px); box-shadow: 0 14px 36px rgba(0,212,255,0.4); }
+
+    /* ─── BG EFFECTS ─── */
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: pulse-glow 5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow { 0%,100%{opacity:.35} 50%{opacity:.72} }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+    .fade-in { opacity: 0; }
+    .fade-in.visible { animation: fadeInUp 0.65s ease forwards; }
+
+    /* ══════ NAVBAR ══════ */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 1000;
+      transition: var(--transition);
+      border-bottom: 1px solid transparent;
+    }
+    #navbar.scrolled {
+      background: rgba(8,10,18,0.94);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom-color: rgba(255,255,255,0.07);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      padding: 16px 48px;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; cursor: pointer; }
+    .logo-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); background: linear-gradient(135deg,var(--cyan),var(--cyan-dark)); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .logo-text { font-family: var(--font-display); font-weight: 800; font-size: 20px; letter-spacing: -0.3px; }
+
+    .nav-links { display: flex; align-items: center; gap: 32px; flex: 1; justify-content: center; }
+    .nav-links a { font-size: 14px; color: var(--text-secondary); font-weight: 500; transition: color .2s; }
+    .nav-links a:hover { color: var(--text-primary); }
+
+    .nav-ctas { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: var(--transition); }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+    #mobile-menu { display: none; flex-direction: column; gap: 4px; padding: 16px 24px 24px; background: rgba(8,10,18,0.98); border-top: 1px solid var(--border); width: 100%; }
+    #mobile-menu.open { display: flex; }
+    #mobile-menu a { font-size: 17px; color: var(--text-secondary); padding: 10px 0; border-bottom: 1px solid var(--border); transition: color .2s; }
+    #mobile-menu a:hover { color: var(--text-primary); }
+    .mob-ctas { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .mob-ctas button { width: 100%; justify-content: center; }
+
+    /* ══════ HERO ══════ */
+    #hero {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding-top: 80px;
+    }
+    .hero-inner { display: flex; align-items: center; gap: 64px; padding: 64px 0; position: relative; z-index: 1; width: 100%; }
+    .hero-left { flex: 1; min-width: 0; }
+
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.22); border-radius: 100px; padding: 6px 16px; font-size: 12.5px; color: var(--text-secondary); margin-bottom: 26px; }
+    .bdot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: pulse-glow 2s infinite; flex-shrink: 0; }
+
+    .hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(38px,5vw,68px); line-height: 1.06; letter-spacing: -2px; margin-bottom: 22px; }
+    .hero-desc { font-size: 16.5px; color: var(--text-secondary); line-height: 1.75; max-width: 500px; }
+
+    .hero-ctas { display: flex; gap: 14px; margin-top: 38px; flex-wrap: wrap; }
+    .hero-trust { display: flex; gap: 22px; margin-top: 30px; flex-wrap: wrap; }
+    .tchip { font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .tchip::before { content:''; width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); opacity: .55; flex-shrink: 0; }
+
+    /* Mockup */
+    .hero-right { flex: 0 0 430px; position: relative; }
+    .dash-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 26px; backdrop-filter: blur(20px); box-shadow: 0 40px 100px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.08); animation: float 5s ease-in-out infinite; width: 100%; }
+    .dash-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .dash-ttl { font-family: var(--font-display); font-weight: 700; font-size: 13px; }
+    .ddots { display: flex; gap: 5px; }
+    .dd { width: 9px; height: 9px; border-radius: 50%; }
+
+    .mstats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 18px; }
+    .ms { background: rgba(255,255,255,0.05); border-radius: var(--radius-sm); padding: 10px 6px; text-align: center; }
+    .ms-v { font-family: var(--font-display); font-weight: 800; font-size: 21px; }
+    .ms-l { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+
+    .mrow { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); margin-bottom: 8px; }
+    .mr-t { font-size: 12px; color: #e2e8f0; font-weight: 500; }
+    .mr-id { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .mstat { display: flex; align-items: center; gap: 5px; font-size: 10px; }
+    .sd { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    .fbadge { position: absolute; bottom: -20px; left: -34px; background: rgba(8,10,18,0.92); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 13px 18px; display: flex; align-items: center; gap: 12px; backdrop-filter: blur(20px); box-shadow: 0 16px 44px rgba(0,0,0,0.45); }
+    .fb-v { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+    .fb-l { font-size: 11px; color: var(--text-muted); }
+
+    /* ══════ STATS ══════ */
+    #stats { width: 100%; padding: 60px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.012); }
+    .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 32px; }
+    .stat-item { text-align: center; }
+    .stat-val { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px,4vw,50px); letter-spacing: -2px; line-height: 1; }
+    .stat-lbl { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+
+    /* ══════ FEATURES ══════ */
+    .feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-top: 56px; }
+    .fc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 30px; transition: var(--transition); }
+    .fc:hover { background: rgba(255,255,255,0.06); border-color: var(--border-hover); transform: translateY(-6px); box-shadow: 0 28px 56px rgba(0,0,0,0.3); }
+    .fi { width: 54px; height: 54px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; }
+    .ft { font-family: var(--font-display); font-weight: 700; font-size: 16px; margin-bottom: 9px; }
+    .fd { font-size: 13.5px; color: var(--text-muted); line-height: 1.65; }
+
+    /* ══════ HOW IT WORKS ══════ */
+    .steps-wrap { display: flex; gap: 32px; margin-top: 64px; position: relative; }
+    .sc-line { position: absolute; top: 36px; left: calc(16.66% + 20px); right: calc(16.66% + 20px); height: 1px; background: linear-gradient(90deg,rgba(0,212,255,0.35),rgba(139,92,246,0.35)); z-index: 0; }
+    .step { flex: 1; text-align: center; position: relative; z-index: 1; }
+    .s-circle { width: 74px; height: 74px; border-radius: 50%; background: linear-gradient(135deg,rgba(0,212,255,0.12),rgba(139,92,246,0.12)); border: 1px solid rgba(0,212,255,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; font-size: 28px; backdrop-filter: blur(10px); }
+    .s-num { font-family: var(--font-display); font-size: 11px; font-weight: 800; color: var(--cyan); letter-spacing: 3px; margin-bottom: 9px; }
+    .s-ttl { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin-bottom: 10px; }
+    .s-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.65; max-width: 210px; margin: 0 auto; }
+
+    /* ══════ TESTIMONIALS ══════ */
+    .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-top: 56px; }
+    .tc { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 30px; transition: var(--transition); }
+    .tc:hover { background: rgba(255,255,255,0.055); transform: translateY(-4px); box-shadow: 0 22px 48px rgba(0,0,0,0.3); }
+    .tq { font-size: 44px; line-height: 1; margin-bottom: 16px; opacity: .5; }
+    .tt { font-size: 14px; color: var(--text-secondary); line-height: 1.72; font-style: italic; margin-bottom: 24px; }
+    .tf { display: flex; align-items: center; gap: 13px; border-top: 1px solid var(--border); padding-top: 18px; }
+    .tav { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 13px; flex-shrink: 0; }
+    .tn { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+    .tr { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ══════ CTA ══════ */
+    #cta { width: 100%; padding: 100px 0; position: relative; overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .cta-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .cta-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px,4vw,54px); letter-spacing: -1.5px; line-height: 1.1; max-width: 640px; margin-bottom: 18px; }
+    .cta-desc { font-size: 16px; color: var(--text-secondary); max-width: 460px; line-height: 1.7; margin-bottom: 40px; }
+
+    /* ══════ FOOTER ══════ */
+    footer { width: 100%; background: #050709; border-top: 1px solid rgba(255,255,255,0.06); padding: 72px 0 0; }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 290px 1fr 1fr 1fr 1fr;
+      gap: 48px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .fbrand-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.7; margin-top: 14px; max-width: 240px; }
+
+    .f-tagline { display: inline-flex; align-items: center; gap: 7px; margin-top: 20px; padding: 7px 14px; border-radius: 100px; background: rgba(0,212,255,0.07); border: 1px solid rgba(0,212,255,0.16); font-size: 11.5px; color: rgba(0,212,255,0.75); }
+
+    .f-social { display: flex; gap: 10px; margin-top: 20px; }
+    .fsoc { width: 36px; height: 36px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; transition: var(--transition); text-decoration: none; }
+    .fsoc:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.18); transform: translateY(-2px); }
+
+    .fcol-title { font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-primary); margin-bottom: 20px; }
+
+    .flink { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--text-muted); margin-bottom: 13px; cursor: pointer; transition: color .2s; text-decoration: none; }
+    .flink:hover { color: var(--text-secondary); }
+    .flink:hover .farr { opacity: 1; transform: translateX(3px); }
+    .farr { font-size: 10px; opacity: 0; transition: var(--transition); color: var(--cyan); margin-left: auto; }
+
+    .flink-hi { color: var(--cyan); font-weight: 500; }
+    .flink-hi:hover { color: #fff; }
+
+    .fbadge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 600; margin-left: 4px; vertical-align: middle; flex-shrink: 0; }
+    .fb-live { background: rgba(107,203,119,0.12); color: #6bcb77; border: 1px solid rgba(107,203,119,0.25); }
+    .fb-new { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid rgba(0,212,255,0.22); }
+
+    .footer-bot { padding: 22px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .fcopy { font-size: 12.5px; color: #2d3748; }
+    .fbot-links { display: flex; gap: 20px; }
+    .fbot-links a { font-size: 12.5px; color: #2d3748; transition: color .2s; }
+    .fbot-links a:hover { color: var(--text-muted); }
+
+    /* ══════ RESPONSIVE ══════ */
+    @media (max-width: 1100px) {
+      .footer-grid { grid-template-columns: 250px 1fr 1fr 1fr; gap: 32px; }
+      .footer-grid .fcol-last { grid-column: 2; }
+      .container { padding: 0 32px; }
+      .nav-inner { padding: 16px 32px; }
+    }
+    @media (max-width: 900px) {
+      .hero-right { display: none; }
+      .feat-grid { grid-template-columns: repeat(2,1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+      .footer-grid > :first-child { grid-column: 1 / -1; }
+      .container { padding: 0 28px; }
+      .nav-inner { padding: 16px 28px; }
+    }
+    @media (max-width: 768px) {
+      .section { padding: 68px 0; }
+      .nav-links, .nav-ctas { display: none; }
+      .hamburger { display: flex; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); gap: 20px; }
+      .steps-wrap { flex-direction: column; gap: 40px; }
+      .sc-line { display: none; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+      .footer-bot { flex-direction: column; text-align: center; }
+      .container { padding: 0 20px; }
+      .nav-inner { padding: 14px 20px; }
+    }
+    @media (max-width: 540px) {
+      .feat-grid { grid-template-columns: 1fr; }
+      .hero-ctas { flex-direction: column; }
+      .hero-ctas .btn, .hero-ctas .btn-hero-sec { width: 100%; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .fbot-links { flex-wrap: wrap; justify-content: center; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════ NAVBAR ══════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">ComplainHub</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="#cta">Contact</a>
+    </div>
+    <div class="nav-ctas">
+      <button class="btn btn-outline" onclick="window.open('https://complain-management-system-tau.vercel.app/login','_blank')">Login</button>
+      <button class="btn btn-primary" onclick="window.open('https://complain-management-system-tau.vercel.app/register','_blank')">Register Free</button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div id="mobile-menu">
+    <a href="#features" onclick="closeMobileMenu()">Features</a>
+    <a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a>
+    <a href="#testimonials" onclick="closeMobileMenu()">Testimonials</a>
+    <a href="#cta" onclick="closeMobileMenu()">Contact</a>
+    <div class="mob-ctas">
+      <button class="btn btn-outline" onclick="window.open('https://complain-management-system-tau.vercel.app/login','_blank')">Login</button>
+      <button class="btn btn-primary" onclick="window.open('https://complain-management-system-tau.vercel.app/register','_blank')">Register Free</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════ HERO ══════ -->
+<section id="hero">
+  <div class="grid-bg"></div>
+  <div class="orb" style="top:6%;left:-2%;width:520px;height:520px;background:radial-gradient(circle,rgba(0,212,255,0.11) 0%,transparent 70%);"></div>
+  <div class="orb" style="bottom:5%;right:-2%;width:600px;height:600px;background:radial-gradient(circle,rgba(139,92,246,0.1) 0%,transparent 70%);animation-delay:2.5s;"></div>
+  <div class="orb" style="top:50%;left:42%;width:360px;height:360px;background:radial-gradient(circle,rgba(255,107,107,0.06) 0%,transparent 70%);animation-delay:1.2s;"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-badge">
+          <div class="bdot"></div>
+          Real-time tracking &amp; file attachments now live
+        </div>
+        <h1 class="hero-title">
+          Manage Complaints.<br>
+          <span class="grad-text">Resolve Faster.</span><br>
+          Stay Organized.
+        </h1>
+        <p class="hero-desc">A powerful full-stack platform where users submit grievances and admins resolve them — with transparency, speed, and accountability built in.</p>
+        <div class="hero-ctas">
+          <button class="btn btn-primary btn-hero" onclick="window.open('https://complain-management-system-tau.vercel.app/register','_blank')">Submit a Complaint &rarr;</button>
+          <button class="btn-hero-sec" onclick="window.open('https://complain-management-system-tau.vercel.app/login','_blank')">Admin Login</button>
+        </div>
+        <div class="hero-trust">
+          <span class="tchip">Secure JWT Auth</span>
+          <span class="tchip">File Attachments</span>
+          <span class="tchip">Role-based Access</span>
+          <span class="tchip">MongoDB Backend</span>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="dash-card">
+          <div class="dash-hd">
+            <span class="dash-ttl">Admin Dashboard</span>
+            <div class="ddots">
+              <div class="dd" style="background:#ff6b6b;"></div>
+              <div class="dd" style="background:#ffd93d;"></div>
+              <div class="dd" style="background:#6bcb77;"></div>
+            </div>
+          </div>
+          <div class="mstats">
+            <div class="ms"><div class="ms-v" style="color:#00d4ff;">124</div><div class="ms-l">Total</div></div>
+            <div class="ms"><div class="ms-v" style="color:#6bcb77;">98</div><div class="ms-l">Resolved</div></div>
+            <div class="ms"><div class="ms-v" style="color:#ffd93d;">18</div><div class="ms-l">Pending</div></div>
+            <div class="ms"><div class="ms-v" style="color:#ff9f43;">8</div><div class="ms-l">Progress</div></div>
+          </div>
+          <div class="mrow">
+            <div><div class="mr-t">Water supply issue</div><div class="mr-id">#1042 &bull; High Priority</div></div>
+            <div class="mstat" style="color:#6bcb77;"><div class="sd" style="background:#6bcb77;"></div>Resolved</div>
+          </div>
+          <div class="mrow">
+            <div><div class="mr-t">Road damage on sector 4</div><div class="mr-id">#1043 &bull; Medium Priority</div></div>
+            <div class="mstat" style="color:#ff9f43;"><div class="sd" style="background:#ff9f43;"></div>In Progress</div>
+          </div>
+          <div class="mrow">
+            <div><div class="mr-t">Street light broken</div><div class="mr-id">#1044 &bull; Low Priority</div></div>
+            <div class="mstat" style="color:#ffd93d;"><div class="sd" style="background:#ffd93d;"></div>Pending</div>
+          </div>
+        </div>
+        <div class="fbadge">
+          <div style="font-size:22px;">🎯</div>
+          <div><div class="fb-v">98% Resolved</div><div class="fb-l">This month</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ STATS ══════ -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-val" data-target="12400" data-suffix="+">0</div><div class="stat-lbl">Complaints Filed</div></div>
+      <div class="stat-item"><div class="stat-val" data-target="9800" data-suffix="+">0</div><div class="stat-lbl">Successfully Resolved</div></div>
+      <div class="stat-item"><div class="stat-val" data-target="340" data-suffix="+">0</div><div class="stat-lbl">Active Users</div></div>
+      <div class="stat-item"><div class="stat-val" data-target="98" data-suffix="%">0</div><div class="stat-lbl">Satisfaction Rate</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ FEATURES ══════ -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need to <span class="cyan">manage grievances</span></h2>
+    <p class="section-desc">From secure authentication to real-time tracking — built for speed, clarity, and accountability.</p>
+    <div class="feat-grid">
+      <div class="fc fade-in"><div class="fi" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.22);">🔐</div><div class="ft">JWT Authentication</div><p class="fd">Secure login and registration with industry-standard token-based auth for users and admins alike.</p></div>
+      <div class="fc fade-in" style="animation-delay:.1s"><div class="fi" style="background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.22);">📡</div><div class="ft">Real-time Tracking</div><p class="fd">Monitor complaint status live — from submission to resolution, every step is fully visible.</p></div>
+      <div class="fc fade-in" style="animation-delay:.2s"><div class="fi" style="background:rgba(255,217,61,0.1);border:1px solid rgba(255,217,61,0.22);">📎</div><div class="ft">File Attachments</div><p class="fd">Attach images, PDFs, and documents directly to your complaint for stronger supporting context.</p></div>
+      <div class="fc fade-in" style="animation-delay:.3s"><div class="fi" style="background:rgba(107,203,119,0.1);border:1px solid rgba(107,203,119,0.22);">🛠️</div><div class="ft">Admin Dashboard</div><p class="fd">Powerful admin panel with full control over complaints, users, assignments, and analytics.</p></div>
+      <div class="fc fade-in" style="animation-delay:.4s"><div class="fi" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.22);">👥</div><div class="ft">Role-based Access</div><p class="fd">Separate portals for users, staff, and admins — each with carefully tailored permissions.</p></div>
+      <div class="fc fade-in" style="animation-delay:.5s"><div class="fi" style="background:rgba(255,159,67,0.1);border:1px solid rgba(255,159,67,0.22);">🎯</div><div class="ft">Priority Filtering</div><p class="fd">Sort and filter by status, category, or priority level for faster and more targeted resolution.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ HOW IT WORKS ══════ -->
+<section class="section section-alt" id="how-it-works">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Three steps to resolution</h2>
+    <p class="section-desc">Simple for users. Powerful for admins. Effective for everyone involved.</p>
+    <div class="steps-wrap">
+      <div class="sc-line"></div>
+      <div class="step fade-in">
+        <div class="s-circle">✍️</div>
+        <div class="s-num">STEP 01</div>
+        <div class="s-ttl">Register &amp; Login</div>
+        <p class="s-desc">Create your account in seconds. Secure JWT authentication keeps your data protected.</p>
+      </div>
+      <div class="step fade-in" style="animation-delay:.2s">
+        <div class="s-circle">📋</div>
+        <div class="s-num">STEP 02</div>
+        <div class="s-ttl">Submit Complaint</div>
+        <p class="s-desc">Fill out the form, attach evidence, set priority — done in under a minute.</p>
+      </div>
+      <div class="step fade-in" style="animation-delay:.4s">
+        <div class="s-circle">✅</div>
+        <div class="s-num">STEP 03</div>
+        <div class="s-ttl">Track &amp; Resolve</div>
+        <p class="s-desc">Get real-time updates. Admin assigns and resolves. Stay informed at every step.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ TESTIMONIALS ══════ -->
+<section class="section" id="testimonials">
+  <div class="container">
+    <div class="section-label">Testimonials</div>
+    <h2 class="section-title">Trusted by teams that <span class="cyan">care</span></h2>
+    <div class="testi-grid">
+      <div class="tc fade-in">
+        <div class="tq" style="color:#00d4ff;">"</div>
+        <p class="tt">ComplainHub transformed how we handle citizen grievances. Resolution time dropped by 60% in just two months of using the system.</p>
+        <div class="tf"><div class="tav" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;">PS</div><div><div class="tn">Priya Sharma</div><div class="tr">Municipal Officer</div></div></div>
+      </div>
+      <div class="tc fade-in" style="animation-delay:.15s">
+        <div class="tq" style="color:#8b5cf6;">"</div>
+        <p class="tt">The role-based access and admin dashboard are exceptional. Our team manages hundreds of complaints each week, completely effortlessly.</p>
+        <div class="tf"><div class="tav" style="background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);color:#8b5cf6;">RV</div><div><div class="tn">Rahul Verma</div><div class="tr">IT Administrator</div></div></div>
+      </div>
+      <div class="tc fade-in" style="animation-delay:.3s">
+        <div class="tq" style="color:#6bcb77;">"</div>
+        <p class="tt">I submitted my complaint and could track every update live. Got fully resolved in 48 hours. Incredibly transparent system.</p>
+        <div class="tf"><div class="tav" style="background:rgba(107,203,119,0.12);border:1px solid rgba(107,203,119,0.3);color:#6bcb77;">SP</div><div><div class="tn">Sneha Patel</div><div class="tr">Regular User</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ CTA ══════ -->
+<section id="cta">
+  <div class="orb" style="top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:220px;background:radial-gradient(ellipse,rgba(0,212,255,0.12) 0%,transparent 70%);"></div>
+  <div class="container">
+    <div class="cta-inner">
+      <div class="section-label">Get Started Today</div>
+      <h2 class="cta-title">Ready to streamline your<br><span class="grad-text">complaint process?</span></h2>
+      <p class="cta-desc">Join thousands of organizations already using ComplainHub for faster, fairer, and more transparent resolution.</p>
+      <button class="btn-cta" onclick="window.open('https://complain-management-system-tau.vercel.app/register','_blank')">Get Started Free &rarr;</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ FOOTER ══════ -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+
+      <!-- Brand col -->
+      <div>
+        <div class="logo">
+          <div class="logo-icon">⚡</div>
+          <span class="logo-text">ComplainHub</span>
+        </div>
+        <p class="fbrand-desc">A full-stack complaint management platform built with React, Node.js, MongoDB &amp; JWT. Fast, secure, and production ready.</p>
+        <div class="f-tagline">
+          <span style="width:7px;height:7px;border-radius:50%;background:#6bcb77;flex-shrink:0;display:inline-block;animation:pulse-glow 2s infinite;"></span>
+          Live on Vercel &amp; Render
+        </div>
+        <div class="f-social">
+          <a class="fsoc" href="https://complain-management-system-tau.vercel.app" target="_blank" title="Live App">🌐</a>
+          <a class="fsoc" href="#" title="GitHub">🐙</a>
+          <a class="fsoc" href="#" title="Twitter">🐦</a>
+          <a class="fsoc" href="#" title="LinkedIn">💼</a>
+        </div>
+      </div>
+
+      <!-- Account col -->
+      <div>
+        <div class="fcol-title">Account</div>
+        <a class="flink flink-hi" onclick="window.open('https://complain-management-system-tau.vercel.app/login','_blank')">
+          Login <span class="fbadge fb-live">● Live</span><span class="farr">›</span>
+        </a>
+        <a class="flink flink-hi" onclick="window.open('https://complain-management-system-tau.vercel.app/register','_blank')">
+          Register Free <span class="fbadge fb-new">New</span><span class="farr">›</span>
+        </a>
+        <a class="flink" onclick="window.open('https://complain-management-system-tau.vercel.app/register','_blank')">
+          Submit a Complaint <span class="farr">›</span>
+        </a>
+        <a class="flink" onclick="window.open('https://complain-management-system-tau.vercel.app/login','_blank')">
+          Admin Login <span class="farr">›</span>
+        </a>
+      </div>
+
+      <!-- Product col -->
+      <div>
+        <div class="fcol-title">Product</div>
+        <a class="flink" href="#features">Features <span class="farr">›</span></a>
+        <a class="flink" href="#how-it-works">How It Works <span class="farr">›</span></a>
+        <a class="flink" href="#testimonials">Testimonials <span class="farr">›</span></a>
+        <a class="flink" href="#stats">Stats &amp; Metrics <span class="farr">›</span></a>
+        <a class="flink" href="#cta">Contact <span class="farr">›</span></a>
+      </div>
+
+      <!-- Tech Stack col -->
+      <div>
+        <div class="fcol-title">Tech Stack</div>
+        <a class="flink" href="#">React.js + Vite <span class="farr">›</span></a>
+        <a class="flink" href="#">Node.js + Express <span class="farr">›</span></a>
+        <a class="flink" href="#">MongoDB + Mongoose <span class="farr">›</span></a>
+        <a class="flink" href="#">JWT Auth + Multer <span class="farr">›</span></a>
+        <a class="flink" href="#">Tailwind CSS <span class="farr">›</span></a>
+        <a class="flink" href="#">Axios HTTP Client <span class="farr">›</span></a>
+      </div>
+
+      <!-- Deploy col -->
+      <div class="fcol-last">
+        <div class="fcol-title">Deployment</div>
+        <a class="flink" href="https://complain-management-system-tau.vercel.app" target="_blank">Frontend — Vercel <span class="farr">›</span></a>
+        <a class="flink" href="#">Backend — Render <span class="farr">›</span></a>
+        <a class="flink" href="#">Database — MongoDB Atlas <span class="farr">›</span></a>
+        <a class="flink" href="#">GitHub Repository <span class="farr">›</span></a>
+        <a class="flink" href="#">API Docs &amp; Endpoints <span class="farr">›</span></a>
+      </div>
+
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bot">
+      <span class="fcopy">&copy; 2025 ComplainHub. Built with ⚡ React &bull; Node.js &bull; MongoDB &bull; JWT. All rights reserved.</span>
+      <div class="fbot-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+        <a href="https://complain-management-system-tau.vercel.app" target="_blank" style="color:rgba(0,212,255,0.45);" onmouseover="this.style.color='#00d4ff'" onmouseout="this.style.color='rgba(0,212,255,0.45)'">View Live App ↗</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════ JS ══════ -->
+<script>
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  }, { passive: true });
+
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  function closeMobileMenu() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }
+
+  function countUp(el, target, suffix, duration) {
+    const start = performance.now();
+    function update(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.floor(eased * target).toLocaleString() + suffix;
+      if (p < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  let statsStarted = false;
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !statsStarted) {
+      statsStarted = true;
+      document.querySelectorAll('[data-target]').forEach(el => {
+        countUp(el, parseInt(el.dataset.target), el.dataset.suffix || '', 1800);
+      });
+    }
+  }, { threshold: 0.4 }).observe(document.getElementById('stats'));
+
+  new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 }).observe(document.body);
+
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); fadeObserver.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+
+  const sections = document.querySelectorAll('section[id]');
+  const navAs = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = s.id; });
+    navAs.forEach(a => { a.style.color = a.getAttribute('href') === '#' + cur ? '#fff' : ''; });
+  }, { passive: true });
+</script>
+</body>
+</html>
