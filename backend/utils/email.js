@@ -24,10 +24,9 @@ const getTransporter = () => {
   return transporter;
 };
 
-exports.sendOtpEmail = async (to, otp) => {
+exports.sendOtpEmail = async (to, otp, otpExpiryMinutes) => {
   const mailTransporter = getTransporter();
-  const from = process.env.EMAIL_FROM || process.env.SMTP_USER || 'no-reply@complaints.local';
-  const otpExpiryMinutes = Number(process.env.OTP_EXPIRE_MINUTES || 5);
+  const from = process.env.EMAIL_FROM || process.env.SMTP_USER || 'noreply@example.com';
 
   const result = await mailTransporter.sendMail({
     from,
@@ -37,8 +36,8 @@ exports.sendOtpEmail = async (to, otp) => {
     html: `<p>Your OTP is <strong>${otp}</strong>.</p><p>It expires in ${otpExpiryMinutes} minutes.</p>`,
   });
 
-  if (mailTransporter.options.jsonTransport) {
-    console.log(`OTP for ${to}: ${otp}`);
+  if (mailTransporter.options.jsonTransport && process.env.NODE_ENV === 'development') {
+    console.log(`OTP email generated for ${to}`);
     console.log(result.message.toString());
   }
 };

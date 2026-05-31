@@ -132,6 +132,7 @@ const Register = () => {
                   name="otp"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  inputMode="numeric"
                   required
                   className="input-field"
                   placeholder="Enter 6-digit OTP"

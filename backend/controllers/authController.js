@@ -8,6 +8,7 @@ const OTP_EXPIRE_MINUTES = Number(process.env.OTP_EXPIRE_MINUTES || 5);
 
 const hashOtp = (otp) => crypto.createHash('sha256').update(otp).digest('hex');
 const generateOtp = () => crypto.randomInt(100000, 1000000).toString();
+const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -26,8 +27,11 @@ exports.register = async (req, res) => {
 
   try {
     const { name, email, password, phone, address, otp } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    const pendingUser = await User.findOne({ email }).select('+otp.codeHash +otp.expiresAt');
+    const pendingUser = await User.findOne({ email: normalizedEmail }).select(
+      '+otp.codeHash +otp.expiresAt'
+    );
     if (!pendingUser) {
       return res.status(400).json({ success: false, message: 'Please request OTP first' });
     }
@@ -46,7 +50,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'OTP expired. Please request a new OTP' });
     }
 
-    if (hashOtp(otp) !== pendingUser.otp.codeHash) {
+    if (hashOtp(String(otp)) !== pendingUser.otp.codeHash) {
       return res.status(400).json({ success: false, message: 'Invalid OTP' });
     }
 
@@ -87,7 +91,7 @@ exports.requestRegisterOtp = async (req, res) => {
 
   try {
     const { email } = req.body;
-    const normalizedEmail = String(email).toLowerCase();
+    const normalizedEmail = normalizeEmail(email);
 
     let user = await User.findOne({ email: normalizedEmail }).select('+otp.codeHash +otp.expiresAt');
     if (user?.emailVerified) {
@@ -110,7 +114,15 @@ exports.requestRegisterOtp = async (req, res) => {
     };
 
     await user.save();
-    await sendOtpEmail(normalizedEmail, otp);
+    try {
+      await sendOtpEmail(normalizedEmail, otp, OTP_EXPIRE_MINUTES);
+    } catch (emailError) {
+      console.error('Failed to send OTP email:', emailError.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send OTP email. Please try again.',
+      });
+    }
 
     res.json({
       success: true,
@@ -132,8 +144,9 @@ exports.login = async (req, res) => {
 
   try {
     const { email, password } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -186,8 +199,9 @@ exports.adminLogin = async (req, res) => {
 
   try {
     const { email, password } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -203,6 +217,10 @@ exports.adminLogin = async (req, res) => {
 
     if (user.role !== 'admin' && user.role !== 'staff') {
       return res.status(403).json({ success: false, message: 'Access denied. Admin only.' });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ success: false, message: 'Account is deactivated' });
     }
 
     const token = generateToken(user._id);
