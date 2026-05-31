@@ -26,8 +26,13 @@ export const AuthProvider = ({ children }) => {
     return data.user
   }
 
-  const register = async (name, email, password, phone, address) => {
-    const data = await authService.register(name, email, password, phone, address)
+  const requestRegisterOtp = async (email) => {
+    const data = await authService.requestRegisterOtp(email)
+    return data
+  }
+
+  const register = async (name, email, password, otp, phone, address) => {
+    const data = await authService.register(name, email, password, otp, phone, address)
     localStorage.setItem('token', data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     setUser(data.user)
@@ -41,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, requestRegisterOtp, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

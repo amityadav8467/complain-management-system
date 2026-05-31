@@ -2,7 +2,13 @@ const express = require('express');
 const { body } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
-const { register, login, adminLogin, getMe } = require('../controllers/authController');
+const {
+  register,
+  requestRegisterOtp,
+  login,
+  adminLogin,
+  getMe,
+} = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
 const authLimiter = rateLimit({
@@ -24,8 +30,12 @@ const registerValidation = [
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters'),
+  body('otp').isLength({ min: 6, max: 6 }).isNumeric().withMessage('Enter a valid 6-digit OTP'),
 ];
 
+const requestOtpValidation = [body('email').isEmail().normalizeEmail().withMessage('Enter a valid email')];
+
+router.post('/register/request-otp', authLimiter, requestOtpValidation, requestRegisterOtp);
 router.post('/register', authLimiter, registerValidation, register);
 router.post('/login', authLimiter, loginValidation, login);
 router.post('/admin-login', authLimiter, loginValidation, adminLogin);

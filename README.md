@@ -130,6 +130,13 @@ PORT=5000
 MONGO_URI=mongodb://localhost:27017/complaint-management
 JWT_SECRET=your_super_secret_key
 JWT_EXPIRE=30d
+OTP_EXPIRE_MINUTES=5
+EMAIL_FROM=no-reply@example.com
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=smtp_user
+SMTP_PASS=smtp_password
 NODE_ENV=development
 ```
 
@@ -143,7 +150,8 @@ VITE_API_URL=http://localhost:5000/api
 ### Authentication
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/register/request-otp` | Send registration OTP to email |
+| POST | `/api/auth/register` | Register new user with OTP |
 | POST | `/api/auth/login` | User login |
 | POST | `/api/auth/admin-login` | Admin/Staff login |
 | GET | `/api/auth/me` | Get current user |
