@@ -5,7 +5,9 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Name is required'],
+      required: function () {
+        return this.emailVerified;
+      },
       trim: true,
       maxlength: [100, 'Name cannot exceed 100 characters'],
     },
@@ -19,7 +21,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
+      required: function () {
+        return this.emailVerified;
+      },
       minlength: [6, 'Password must be at least 6 characters'],
       select: false,
     },
@@ -40,13 +44,27 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    otp: {
+      codeHash: {
+        type: String,
+        select: false,
+      },
+      expiresAt: {
+        type: Date,
+        select: false,
+      },
+    },
   },
   { timestamps: true }
 );
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.password || !this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
